@@ -1,0 +1,36 @@
+name: github pages
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./CameraTorrent
+    steps:
+      # Checkout the code
+      - uses: actions/checkout@v3
+
+      # Install .NET Core SDK
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 6.0.x
+
+      # Publish the site
+      - name: Publish
+        run: dotnet publish CameraTorrent -c:Release -o:publish -p:GHPages=true
+
+      # Deploy the site
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: CameraTorrent/publish/wwwroot
+          force_orphan: true

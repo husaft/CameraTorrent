@@ -1,2 +1,11 @@
 # CameraTorrent
-An app for sharing files per camera in an offline mode
+Share files in an offline fashion
+
+## Howto
+
+```console
+~$ ./build.sh
+```
+
+## Demo
+https://husaft.github.io/CameraTorrent
