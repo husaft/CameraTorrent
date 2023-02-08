@@ -1,0 +1,23 @@
+﻿@page "/receive"
+
+<PageTitle>Receive</PageTitle>
+
+<h1>File receiving</h1>
+
+Select one or more photos and the package will be opened for you.
+
+<br />
+<br />
+
+<input id="inputImage" type="file" name="inputImage" accept="image/*" capture />
+
+<br />
+<br />
+
+<button class="btn btn-primary" @onclick="ProcessImages">Start!</button>
+
+@code {
+    private void ProcessImages()
+    {
+    }
+}
