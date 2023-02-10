@@ -5,6 +5,10 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CameraTorrent", "CameraTorrent\CameraTorrent.csproj", "{2B89E9A3-3DD1-4E3A-8B68-288B76B87238}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CameraTorrent.Lib", "CameraTorrent.Lib\CameraTorrent.Lib.csproj", "{DF8EA270-60B8-4BDE-9E07-0E5CEC709466}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CameraTorrent.Lib.Tests", "CameraTorrent.Lib.Tests\CameraTorrent.Lib.Tests.csproj", "{EF335C22-D5C4-46CE-8B51-37F10D78B554}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +22,13 @@ Global
 		{2B89E9A3-3DD1-4E3A-8B68-288B76B87238}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B89E9A3-3DD1-4E3A-8B68-288B76B87238}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B89E9A3-3DD1-4E3A-8B68-288B76B87238}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF8EA270-60B8-4BDE-9E07-0E5CEC709466}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF8EA270-60B8-4BDE-9E07-0E5CEC709466}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF8EA270-60B8-4BDE-9E07-0E5CEC709466}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF8EA270-60B8-4BDE-9E07-0E5CEC709466}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF335C22-D5C4-46CE-8B51-37F10D78B554}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF335C22-D5C4-46CE-8B51-37F10D78B554}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF335C22-D5C4-46CE-8B51-37F10D78B554}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF335C22-D5C4-46CE-8B51-37F10D78B554}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

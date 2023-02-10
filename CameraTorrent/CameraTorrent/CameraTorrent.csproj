@@ -12,9 +12,10 @@
     <PackageReference Include="MonoTorrent" Version="2.0.7" />
     <PackageReference Include="PublishSPAforGitHubPages.Build" Version="2.0.2" />
     <PackageReference Include="SharpCompress" Version="0.32.2" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="2.1.3" />
-    <PackageReference Include="ZXing.Net" Version="0.16.8" />
-    <PackageReference Include="ZXing.Net.Bindings.ImageSharp.V2" Version="0.16.14" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CameraTorrent.Lib\CameraTorrent.Lib.csproj" />
   </ItemGroup>
 
 </Project>
