@@ -9,9 +9,9 @@ namespace CameraTorrent.Lib.Tests
         [Theory]
         [InlineData("catalog.xml", 245)]
         [InlineData("books.xml", 4548)]
-        //[InlineData("logo.pdf", 437186)]
-        //[InlineData("tondano.xml", 175592)]
-        //[InlineData("yukon.pdf", 20597)]
+        [InlineData("logo.pdf", 437186)]
+        [InlineData("tondano.xml", 175592)]
+        [InlineData("yukon.pdf", 20597)]
         public async Task ShouldCompress(string fileName, int size)
         {
             const string resDir = "Resources";
