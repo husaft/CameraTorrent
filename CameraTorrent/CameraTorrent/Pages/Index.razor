@@ -64,7 +64,7 @@ Select one or more files and they will be packaged up for you.
 	private async Task ProcessFiles()
 	{
 		await using var mem = new MemoryStream();
-		var options = new WriterOptions(CompressionType.LZip);
+		/* var options = new WriterOptions(CompressionType.LZip);
 		using (var writer = WriterFactory.Open(mem, ArchiveType.Tar, options))
 		{
 			foreach (var file in _loadedFiles)
@@ -78,7 +78,7 @@ Select one or more files and they will be packaged up for you.
 				tmp.Position = 0L;
 				writer.Write(name, tmp, modTime);
 			}
-		}
+		} */
 
 		var bytes = mem.ToArray();
 		_status = $"Package size = {bytes.Length.Bytes().Humanize()}";
