@@ -1,6 +1,8 @@
 ﻿@page "/"
 @using Humanizer
-@using System.IO
+@using CameraTorrent.Lib
+@using CameraTorrent.Lib.Util
+@using CameraTorrent.Util
 
 <PageTitle>Send</PageTitle>
 
@@ -45,9 +47,17 @@ Select one or more files and they will be packaged up for you.
 
 <p>@_status</p>
 
+<ol>
+	@foreach (var image in _loadedCodes)
+	{
+		<li>
+			<img src="@image" alt="code" style="width:45%;" />
+		</li>
+	}
+</ol>
+
 @code {
 	private const int MaxFileCount = 13;
-	private const int MaxFileSize = 45 * 1024 * 1024;
 	private readonly List<IBrowserFile> _loadedFiles = new();
 
 	private void LoadFiles(InputFileChangeEventArgs e)
@@ -57,32 +67,21 @@ Select one or more files and they will be packaged up for you.
 		{
 			_loadedFiles.Add(file);
 		}
+		_status = string.Empty;
+		_loadedCodes.Clear();
 	}
 
 	private string _status = "";
+	private readonly Torrent _torrent = new();
+	private readonly List<string> _loadedCodes = new();
 
 	private async Task ProcessFiles()
 	{
-		await using var mem = new MemoryStream();
-		/* var options = new WriterOptions(CompressionType.LZip);
-		using (var writer = WriterFactory.Open(mem, ArchiveType.Tar, options))
+		var args = _loadedFiles.Select(l => l.Wrap()).ToArray();
+		await foreach (var qr in _torrent.Pack(args))
 		{
-			foreach (var file in _loadedFiles)
-			{
-				var name = file.Name;
-				var modTime = file.LastModified.DateTime;
-
-				await using var stream = file.OpenReadStream(MaxFileSize);
-				await using var tmp = new MemoryStream();
-				await stream.CopyToAsync(tmp);
-				tmp.Position = 0L;
-				writer.Write(name, tmp, modTime);
-			}
-		} */
-
-		var bytes = mem.ToArray();
-		_status = $"Package size = {bytes.Length.Bytes().Humanize()}";
-
-		// TODO
+			_loadedCodes.Add(qr.ToBase64Str());
+		}
+		_status = $"{_loadedCodes.Count} codes generated.";
 	}
 }
