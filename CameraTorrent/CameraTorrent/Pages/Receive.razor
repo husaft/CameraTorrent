@@ -3,6 +3,8 @@
 @using CameraTorrent.Lib
 @using CameraTorrent.Lib.API
 @using CameraTorrent.Lib.Util
+@using System.IO
+@inject IJSRuntime JS
 
 <PageTitle>Camera Torrent</PageTitle>
 
@@ -60,9 +62,6 @@ Select one or more photos and the package will be opened for you.
 
 <p>@_status</p>
 
-<ol>
-</ol>
-
 @code {
 	private const int MaxFileCount = 33;
 	private const int MaxImageSize = 9 * 1024 * 1024;
@@ -76,7 +75,6 @@ Select one or more photos and the package will be opened for you.
 		_bucket = new Bucket();
 		_currentFiles = Array.Empty<Bucket.BucketFile>();
 		_torrent = new Torrent();
-		_loadedFiles.Clear();
 		_failedCodes.Clear();
 		_goodCodes.Clear();
 	}
@@ -101,7 +99,6 @@ Select one or more photos and the package will be opened for you.
 	private Bucket.BucketFile[] _currentFiles = Array.Empty<Bucket.BucketFile>();
 	private Torrent _torrent = new();
 
-	private readonly List<IFileArg> _loadedFiles = new();
 	private readonly List<int> _failedCodes = new();
 	private readonly List<int> _goodCodes = new();
 
@@ -130,10 +127,11 @@ Select one or more photos and the package will be opened for you.
 			.First(t => t.Name == fileRef.Meta.Name);
 		await using var stream = await arg.Read(MaxFileSize);
 
-		// TODO ?!
-
 		var name = arg.Name;
 		var size = stream.Length.Bytes().Humanize();
+		using var streamRef = new DotNetStreamReference(stream);
+		await JS.InvokeVoidAsync("downloadFileFromStream", name, streamRef);
+
 		_status = $"Downloaded '{name}' with {size}!";
 	}
 }
