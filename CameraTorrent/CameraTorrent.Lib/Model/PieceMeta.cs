@@ -6,6 +6,6 @@
 
         public ushort Offset { get; set; }
 
-        public string[] Pieces { get; set; }
+        public ushort Length { get; set; }
     }
 }

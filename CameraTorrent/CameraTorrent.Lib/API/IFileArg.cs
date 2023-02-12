@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace CameraTorrent.Lib.API
 {
@@ -14,6 +15,6 @@ namespace CameraTorrent.Lib.API
 
         string ContentType { get; }
 
-        Stream OpenReadStream(long maxAllowedSize, CancellationToken token = default);
+        Task<Stream> Read(long maxAllowedSize, CancellationToken token = default);
     }
 }

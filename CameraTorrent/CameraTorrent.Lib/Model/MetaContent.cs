@@ -5,5 +5,7 @@
         public ushort PieceLen { get; set; }
 
         public PieceMeta[] Files { get; set; }
+
+        public PieceStats Stats { get; set; }
     }
 }

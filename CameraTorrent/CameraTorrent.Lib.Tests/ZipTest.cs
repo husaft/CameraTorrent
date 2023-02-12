@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CameraTorrent.Lib.API;
+using CameraTorrent.Lib.Util;
 using CameraTorrent.Util;
 using Xunit;
 
@@ -42,7 +43,7 @@ namespace CameraTorrent.Lib.Tests
             var handle = new Torrent();
             var preDir = Path.Combine(od, prefix);
             var imageFiles = await WriteToImage(preDir, inputs, handle);
-            var @new = await ReadFromImage(imageFiles, handle);
+            var @new = await ReadFromImage(preDir, imageFiles, handle);
 
             foreach (var (first, second) in raw.Zip(@new))
             {
@@ -55,16 +56,24 @@ namespace CameraTorrent.Lib.Tests
             }
         }
 
-        private static async Task<string[]> ReadFromImage(string[] files, Torrent handle)
+        private static async Task<string[]> ReadFromImage(string prefix,
+            string[] files, Torrent handle)
         {
-            var outs = new List<string>();
+            var bucket = new Bucket();
             foreach (var file in files)
             {
-                var fileOutName = $"_{file.Replace(".png", "")}";
                 await using var fileIn = File.OpenRead(file);
-                await using var data = await handle.Unpack(fileIn);
+                var isGood = await handle.Unpack(fileIn, bucket);
+                if (!isGood)
+                    throw new InvalidOperationException(file);
+            }
 
+            var outs = new List<string>();
+            foreach (var arg in handle.TryUnpack(bucket))
+            {
+                var fileOutName = $"{prefix}_{arg.Name}";
                 await using var fileOut = File.Create(fileOutName);
+                await using var data = await arg.Read(long.MaxValue);
                 await data.CopyToAsync(fileOut);
                 await fileOut.FlushAsync();
                 outs.Add(fileOutName);
