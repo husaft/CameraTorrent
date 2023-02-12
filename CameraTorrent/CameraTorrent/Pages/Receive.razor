@@ -1,9 +1,7 @@
 ﻿@page "/receive"
 @using Humanizer
 @using CameraTorrent.Lib
-@using CameraTorrent.Lib.API
 @using CameraTorrent.Lib.Util
-@using System.IO
 @inject IJSRuntime JS
 
 <PageTitle>Camera Torrent</PageTitle>
@@ -60,6 +58,7 @@ Select one or more photos and the package will be opened for you.
 <br />
 <br />
 
+<p>@_details</p>
 <p>@_status</p>
 
 @code {
@@ -72,6 +71,7 @@ Select one or more photos and the package will be opened for you.
 	{
 		_loadedImages.Clear();
 		_status = string.Empty;
+		_details = string.Empty;
 		_bucket = new Bucket();
 		_currentFiles = Array.Empty<Bucket.BucketFile>();
 		_torrent = new Torrent();
@@ -95,6 +95,7 @@ Select one or more photos and the package will be opened for you.
 	}
 
 	private string _status = string.Empty;
+	private string _details = string.Empty;
 	private Bucket _bucket = new();
 	private Bucket.BucketFile[] _currentFiles = Array.Empty<Bucket.BucketFile>();
 	private Torrent _torrent = new();
@@ -118,6 +119,9 @@ Select one or more photos and the package will be opened for you.
 			_currentFiles = _bucket.CheckProgress().ToArray();
 		}
 		_loadedImages.Clear();
+		var raw = _bucket.Info.Stats.Raw.Bytes().Humanize();
+		var zip = _bucket.Info.Stats.Zip.Bytes().Humanize();
+		_details = $"{raw} in total, compressed to {zip}";
 		_status = $"{_goodCodes.Count} codes read and {_failedCodes.Count} failed.";
 	}
 
