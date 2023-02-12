@@ -60,6 +60,10 @@ namespace CameraTorrent.Lib.Util
 
         public void Import(MetaContent info)
         {
+            if (Info != null)
+            {
+                return;
+            }
             BuildToc(Info = info);
             _buff = Info.Files
                 .Select(p => new StringBuilder(
