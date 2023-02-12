@@ -6,6 +6,7 @@ using CameraTorrent.Lib.API;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using ZXing;
+using ZXing.Common;
 using ZXing.QrCode;
 using ZXing.QrCode.Internal;
 
@@ -13,7 +14,7 @@ namespace CameraTorrent.Lib.Impl
 {
     public sealed class QRBarcoder : IBarcoder
     {
-        public int Size { get; set; } = 600;
+        public int Size { get; set; } = 640;
 
         public async Task<Stream> Write(string input)
         {
@@ -40,7 +41,15 @@ namespace CameraTorrent.Lib.Impl
         public async Task<string> Read(Stream input)
         {
             using var img = await Image.LoadAsync<Rgb24>(input);
-            var qr = new ZXing.ImageSharp.BarcodeReader<Rgb24>();
+            var qr = new ZXing.ImageSharp.BarcodeReader<Rgb24>
+            {
+                Options = new DecodingOptions
+                {
+                    PossibleFormats = new[] { BarcodeFormat.QR_CODE },
+                    TryHarder = true
+                },
+                AutoRotate = true
+            };
             var result = qr.Decode(img);
             var text = result.Text;
             return text;

@@ -28,6 +28,8 @@ namespace CameraTorrent.Lib.Util
 
                     if (pEnd < from)
                         continue;
+                    if (pFrom > end)
+                        continue;
 
                     if (pFrom >= from && pEnd <= end)
                     {

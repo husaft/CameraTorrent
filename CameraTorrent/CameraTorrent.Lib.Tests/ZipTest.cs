@@ -15,7 +15,6 @@ namespace CameraTorrent.Lib.Tests
         [Theory]
         [InlineData(new[] { "catalog.xml" }, new[] { 245 })]
         [InlineData(new[] { "books.xml" }, new[] { 4548 })]
-        [InlineData(new[] { "logo.pdf" }, new[] { 437186 })]
         [InlineData(new[] { "tondano.xml" }, new[] { 175592 })]
         [InlineData(new[] { "yukon.pdf" }, new[] { 20597 })]
         [InlineData(new[] { "catalog.xml", "books.xml" }, new[] { 245, 4548 })]

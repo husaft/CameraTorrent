@@ -16,7 +16,7 @@ namespace CameraTorrent.Lib
         public IEncoder Encoder { get; set; } = new TextEncoder();
         public IBarcoder Barcoder { get; set; } = new QRBarcoder();
         public int MaxSize { get; set; } = 64 * 1024 * 1024;
-        public int PkgSize { get; set; } = 1024;
+        public int PkgSize { get; set; } = 2700;
 
         public async Task<bool> Unpack(Stream input, Bucket bucket)
         {
