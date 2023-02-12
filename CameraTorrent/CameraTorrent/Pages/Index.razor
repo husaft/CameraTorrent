@@ -51,7 +51,7 @@ Select one or more files and they will be packaged up for you.
 	@foreach (var image in _loadedCodes)
 	{
 		<li>
-			<img src="@image" alt="code" style="width:45%;" />
+			<img src="@image" alt="code" style="width:75%;" />
 		</li>
 	}
 </ol>
@@ -72,6 +72,7 @@ Select one or more files and they will be packaged up for you.
 	}
 
 	private string _status = "";
+
 	private readonly Torrent _torrent = new();
 	private readonly List<string> _loadedCodes = new();
 
