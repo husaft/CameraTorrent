@@ -1,4 +1,9 @@
 ﻿@page "/receive"
+@using Humanizer
+@using CameraTorrent.Lib
+@using CameraTorrent.Lib.API
+@using CameraTorrent.Lib.Util
+@using CameraTorrent.Util
 
 <PageTitle>Camera Torrent</PageTitle>
 
@@ -9,15 +14,98 @@ Select one or more photos and the package will be opened for you.
 <br />
 <br />
 
-<input id="inputImage" type="file" name="inputImage" accept="image/*" capture />
+<InputFile OnChange="@LoadImages" multiple accept="image/*" capture />
 
 <br />
 <br />
+
+<table class="table">
+	<thead>
+	<tr>
+		<th>Name</th>
+		<th>Modified</th>
+		<th>Size</th>
+		<th>Type</th>
+		<th>Loaded</th>
+	</tr>
+	</thead>
+	<tbody>
+	@foreach (var file in _currentFiles)
+	{
+		<tr>
+			<td>@file.Meta.Name</td>
+			<td>@file.Meta.Modified.ToString("g")</td>
+			<td>@file.Meta.Size.Bytes().Humanize()</td>
+			<td>@file.Meta.Type</td>
+			<td>@file.Progress.ToString("F2") %</td>
+		</tr>
+	}
+	</tbody>
+</table>
 
 <button class="btn btn-primary" @onclick="ProcessImages">Start!</button>
+<button class="btn btn-warning" @onclick="ResetImages">Reset!</button>
+
+<br />
+<br />
+
+<p>@_status</p>
+
+<ol>
+</ol>
 
 @code {
-    private void ProcessImages()
-    {
-    }
+	private const int MaxFileCount = 33;
+	private const int MaxImageSize = 9 * 1024 * 1024;
+	private readonly List<IBrowserFile> _loadedImages = new();
+
+	private void ResetImages()
+	{
+		_loadedImages.Clear();
+		_status = string.Empty;
+		_bucket = new Bucket();
+		_currentFiles = Array.Empty<Bucket.BucketFile>();
+		_torrent = new Torrent();
+		_loadedFiles.Clear();
+		_failedCodes.Clear();
+		_goodCodes.Clear();
+	}
+
+	private void LoadImages(InputFileChangeEventArgs e)
+	{
+		_loadedImages.Clear();
+		foreach (var image in e.GetMultipleFiles(MaxFileCount))
+		{
+			_loadedImages.Add(image);
+		}
+		_status = string.Empty;
+	}
+
+	private string _status = string.Empty;
+	private Bucket _bucket = new();
+	private Bucket.BucketFile[] _currentFiles = Array.Empty<Bucket.BucketFile>();
+	private Torrent _torrent = new();
+
+	private readonly List<IFileArg> _loadedFiles = new();
+	private readonly List<int> _failedCodes = new();
+	private readonly List<int> _goodCodes = new();
+
+	private async Task ProcessImages()
+	{
+		var i = 0;
+		foreach (var image in _loadedImages)
+		{
+			i++;
+			await using var stream = image.OpenReadStream(MaxImageSize);
+			if (!await _torrent.Unpack(stream, _bucket))
+			{
+				_failedCodes.Add(i);
+				continue;
+			}
+			_goodCodes.Add(i);
+			_currentFiles = _bucket.CheckProgress().ToArray();
+		}
+		_loadedImages.Clear();
+		_status = $"{_goodCodes.Count} codes read and {_failedCodes.Count} failed.";
+	}
 }
