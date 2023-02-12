@@ -16,5 +16,10 @@ namespace CameraTorrent.Lib.Util
             var str = Convert.ToBase64String(buffer);
             return $"data:{mime};base64,{str}";
         }
+
+        public static string Substr(this string value, int start, int length)
+        {
+            return value?.Substring(start, Math.Min(length, value.Length - start));
+        }
     }
 }

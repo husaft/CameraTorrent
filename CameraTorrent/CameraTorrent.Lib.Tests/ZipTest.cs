@@ -1,5 +1,10 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using CameraTorrent.Lib.API;
+using CameraTorrent.Util;
 using Xunit;
 
 namespace CameraTorrent.Lib.Tests
@@ -7,54 +12,82 @@ namespace CameraTorrent.Lib.Tests
     public class ZipTest
     {
         [Theory]
-        [InlineData("catalog.xml", 245)]
-        [InlineData("books.xml", 4548)]
-        [InlineData("logo.pdf", 437186)]
-        [InlineData("tondano.xml", 175592)]
-        [InlineData("yukon.pdf", 20597)]
-        public async Task ShouldCompress(string fileName, int size)
+        [InlineData(new[] { "catalog.xml" }, new[] { 245 })]
+        [InlineData(new[] { "books.xml" }, new[] { 4548 })]
+        [InlineData(new[] { "logo.pdf" }, new[] { 437186 })]
+        [InlineData(new[] { "tondano.xml" }, new[] { 175592 })]
+        [InlineData(new[] { "yukon.pdf" }, new[] { 20597 })]
+        [InlineData(new[] { "catalog.xml", "books.xml" }, new[] { 245, 4548 })]
+        [InlineData(new[] { "icons1.png", "icons3.png", "icons2.png" }, new[] { 282, 161, 150 })]
+        [InlineData(new[] { "yukon.pdf", "tondano.xml" }, new[] { 20597, 175592 })]
+        public async Task ShouldCompress(string[] fileNames, int[] sizes)
         {
             const string resDir = "Resources";
-            var rawFile = Path.Combine(resDir, fileName);
-            Directory.CreateDirectory($"_{resDir}");
+            var od = Directory.CreateDirectory($"_{resDir}").FullName;
 
-            var info = new FileInfo(rawFile);
-            Assert.Equal(size, info.Length);
+            var raw = fileNames.Zip(sizes, (f, s) =>
+                (fileName: Path.Combine(resDir, f), size: s)).ToArray();
+            var prefix = string.Join(string.Empty, raw.Select(r =>
+                Path.GetFileNameWithoutExtension(r.fileName)));
+
+            Array.ForEach(raw, a =>
+            {
+                var info = new FileInfo(a.fileName);
+                Assert.Equal(a.size, info.Length);
+            });
+
+            var inputs = raw.Select(r =>
+                new FileInfo(r.fileName).Wrap().Wrap()).ToArray();
 
             var handle = new Torrent();
-            var imageFile = await WriteToImage(rawFile, handle);
-            var newFile = await ReadFromImage(imageFile, handle);
+            var preDir = Path.Combine(od, prefix);
+            var imageFiles = await WriteToImage(preDir, inputs, handle);
+            var @new = await ReadFromImage(imageFiles, handle);
 
-            var nInfo = new FileInfo(newFile);
-            Assert.Equal(size, nInfo.Length);
+            foreach (var (first, second) in raw.Zip(@new))
+            {
+                var nInfo = new FileInfo(second);
+                Assert.Equal(first.size, nInfo.Length);
 
-            var alpha = await File.ReadAllBytesAsync(rawFile);
-            var beta = await File.ReadAllBytesAsync(newFile);
-            Assert.Equal(alpha, beta);
+                var alpha = await File.ReadAllBytesAsync(first.fileName);
+                var beta = await File.ReadAllBytesAsync(second);
+                Assert.Equal(alpha, beta);
+            }
         }
 
-        private static async Task<string> ReadFromImage(string file, Torrent handle)
+        private static async Task<string[]> ReadFromImage(string[] files, Torrent handle)
         {
-            await using var fileIn = File.OpenRead(file);
-            await using var data = await handle.Unpack(fileIn);
+            var outs = new List<string>();
+            foreach (var file in files)
+            {
+                var fileOutName = $"_{file.Replace(".png", "")}";
+                await using var fileIn = File.OpenRead(file);
+                await using var data = await handle.Unpack(fileIn);
 
-            var fileOutName = $"_{file.Replace(".png", "")}";
-            await using var fileOut = File.Create(fileOutName);
-            await data.CopyToAsync(fileOut);
-            await fileOut.FlushAsync();
-            return fileOutName;
+                await using var fileOut = File.Create(fileOutName);
+                await data.CopyToAsync(fileOut);
+                await fileOut.FlushAsync();
+                outs.Add(fileOutName);
+            }
+            return outs.ToArray();
         }
 
-        private static async Task<string> WriteToImage(string file, Torrent handle)
+        private static async Task<string[]> WriteToImage(string prefix,
+            IFileArg[] inputs, Torrent handle)
         {
-            await using var fileIn = File.OpenRead(file);
-            await using var image = await handle.Pack(fileIn);
+            var outs = new List<string>();
+            var i = 0;
+            await foreach (var code in handle.Pack(inputs))
+            {
+                var fileOutName = $"{prefix}_code_{i++:D3}.png";
+                await using var image = code;
 
-            var fileOutName = $"{file}.png";
-            await using var fileOut = File.Create(fileOutName);
-            await image.CopyToAsync(fileOut);
-            await fileOut.FlushAsync();
-            return fileOutName;
+                await using var fileOut = File.Create(fileOutName);
+                await image.CopyToAsync(fileOut);
+                await fileOut.FlushAsync();
+                outs.Add(fileOutName);
+            }
+            return outs.ToArray();
         }
     }
 }

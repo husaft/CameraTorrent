@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CameraTorrent.Lib\CameraTorrent.Lib.csproj" />
+    <ProjectReference Include="..\CameraTorrent\CameraTorrent.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,6 +28,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\*.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\*.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
