@@ -13,13 +13,19 @@ namespace CameraTorrent.Lib.Tests
     public class ZipTest
     {
         [Theory]
-        [InlineData(new[] { "catalog.xml" }, new[] { 245 })]
         [InlineData(new[] { "books.xml" }, new[] { 4548 })]
+        [InlineData(new[] { "catalog.xml" }, new[] { 245 })]
+        [InlineData(new[] { "icons1.png" }, new[] { 282 })]
+        [InlineData(new[] { "icons2.png" }, new[] { 150 })]
+        [InlineData(new[] { "icons3.png" }, new[] { 161 })]
+        [InlineData(new[] { "sample.docx" }, new[] { 34375 })]
+        [InlineData(new[] { "table.xls" }, new[] { 8704 })]
         [InlineData(new[] { "tondano.xml" }, new[] { 175592 })]
         [InlineData(new[] { "yukon.pdf" }, new[] { 20597 })]
+        [InlineData(new[] { "icons3.png", "tondano.xml" }, new[] { 161, 175592 })]
         [InlineData(new[] { "catalog.xml", "books.xml" }, new[] { 245, 4548 })]
         [InlineData(new[] { "icons1.png", "icons3.png", "icons2.png" }, new[] { 282, 161, 150 })]
-        [InlineData(new[] { "yukon.pdf", "tondano.xml" }, new[] { 20597, 175592 })]
+        [InlineData(new[] { "table.xls", "sample.docx" }, new[] { 8704, 34375 })]
         public async Task ShouldCompress(string[] fileNames, int[] sizes)
         {
             const string resDir = "Resources";
