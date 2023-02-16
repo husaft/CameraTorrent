@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using CameraTorrent.Lib.API;
+using CameraTorrent.Lib.Impl;
 using CameraTorrent.Lib.Model;
 
 namespace CameraTorrent.Lib.Util
@@ -8,7 +9,7 @@ namespace CameraTorrent.Lib.Util
     public sealed class Bucket
     {
         private List<(int id, int from, int end, int idx)> _toc;
-        private StringBuilder[] _buff;
+        private IStringBuff[] _buff;
         private int[] _written;
 
         private void BuildToc(MetaContent info)
@@ -66,9 +67,8 @@ namespace CameraTorrent.Lib.Util
             }
             BuildToc(Info = info);
             _buff = Info.Files
-                .Select(p => new StringBuilder(
-                    string.Join(string.Empty, Enumerable.Repeat(" ", p.Length)))
-                ).ToArray();
+                .Select(p => (IStringBuff)new StringBuff(p.Length))
+                .ToArray();
             _written = info.Files.Select(_ => 0).ToArray();
         }
 
@@ -85,9 +85,9 @@ namespace CameraTorrent.Lib.Util
                 var start = match.from - offset;
                 var len = match.end - offset - start;
                 var bld = _buff[fileId];
-                bld.Remove(start, len);
                 var txt = data.Data.Substring(match.from - pOff, len);
-                bld.Insert(start, txt);
+                if (!bld.Replace(start, len, txt))
+                    continue;
                 _written[fileId] += txt.Length;
             }
         }
@@ -119,7 +119,7 @@ namespace CameraTorrent.Lib.Util
         public record PartialBucketFile(double Progress, FileMeta Meta)
             : BucketFile(Progress, Meta);
 
-        public record CompleteBucketFile(StringBuilder Text, FileMeta Meta)
+        public record CompleteBucketFile(IStringBuff Text, FileMeta Meta)
             : BucketFile(100.0, Meta);
     }
 }

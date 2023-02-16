@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using CameraTorrent.Lib.API;
 using CameraTorrent.Lib.Model;
 
-namespace CameraTorrent.Lib.Util
+namespace CameraTorrent.Lib.Impl
 {
     public class MemFile : IFileArg
     {
