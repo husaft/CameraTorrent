@@ -22,11 +22,14 @@ namespace CameraTorrent.Lib.Tests
         [InlineData(new[] { "table.xls" }, new[] { 8704 })]
         [InlineData(new[] { "tondano.xml" }, new[] { 175592 })]
         [InlineData(new[] { "yukon.pdf" }, new[] { 20597 })]
-        [InlineData(new[] { "icons3.png", "tondano.xml" }, new[] { 161, 175592 })]
+        [InlineData(new[] { "table.xls", "tondano.xml" }, new[] { 8704, 175592 })]
         [InlineData(new[] { "catalog.xml", "books.xml" }, new[] { 245, 4548 })]
         [InlineData(new[] { "icons1.png", "icons3.png", "icons2.png" }, new[] { 282, 161, 150 })]
         [InlineData(new[] { "table.xls", "sample.docx" }, new[] { 8704, 34375 })]
-        public async Task ShouldCompress(string[] fileNames, int[] sizes)
+        [InlineData(new[] { "tondano.xml", "icons1.png" }, new[] { 175592, 282 }, "r")]
+        [InlineData(new[] { "tondano.xml", "icons2.png" }, new[] { 175592, 150 }, "d")]
+        [InlineData(new[] { "tondano.xml", "icons3.png" }, new[] { 175592, 161 }, "rd")]
+        public async Task ShouldCompress(string[] fileNames, int[] sizes, string mode = "")
         {
             const string resDir = "Resources";
             var od = Directory.CreateDirectory($"_{resDir}").FullName;
@@ -48,8 +51,15 @@ namespace CameraTorrent.Lib.Tests
             var handle = new Torrent();
             var preDir = Path.Combine(od, prefix);
             var imageFiles = await WriteToImage(preDir, inputs, handle);
-            var @new = await ReadFromImage(preDir, imageFiles, handle);
+            var inputFiles = imageFiles;
+            if (mode.Contains("r"))
+                inputFiles = inputFiles.Reverse().ToArray();
+            if (mode.Contains("d"))
+                inputFiles = inputFiles.Zip(inputFiles).SelectMany(t =>
+                    new[] { t.First, t.Second }).ToArray();
+            var @new = await ReadFromImage(preDir, inputFiles, handle);
 
+            Assert.Equal(raw.Length, @new.Length);
             foreach (var (first, second) in raw.Zip(@new))
             {
                 var nInfo = new FileInfo(second);

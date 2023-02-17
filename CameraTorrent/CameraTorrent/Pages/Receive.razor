@@ -103,10 +103,12 @@ Select one or more photos and the package will be opened for you.
 	private readonly List<int> _failedCodes = new();
 	private readonly List<int> _goodCodes = new();
 
-	private async Task ProcessImages()
+	private Task ProcessImages() => ProcessImages(_loadedImages);
+
+	private async Task ProcessImages(ICollection<IBrowserFile> loaded)
 	{
 		var i = 0;
-		foreach (var image in _loadedImages)
+		foreach (var image in loaded)
 		{
 			i++;
 			await using var stream = image.OpenReadStream(MaxImageSize);
@@ -118,10 +120,17 @@ Select one or more photos and the package will be opened for you.
 			_goodCodes.Add(i);
 			_currentFiles = _bucket.CheckProgress().ToArray();
 		}
-		_loadedImages.Clear();
-		var raw = _bucket.Info.Stats.Raw.Bytes().Humanize();
-		var zip = _bucket.Info.Stats.Zip.Bytes().Humanize();
-		_details = $"{raw} in total, compressed to {zip}";
+		loaded.Clear();
+		if (_bucket.Info?.Stats != null)
+		{
+			var raw = _bucket.Info.Stats.Raw.Bytes().Humanize();
+			var zip = _bucket.Info.Stats.Zip.Bytes().Humanize();
+			_details = $"{raw} in total, compressed to {zip}";
+		}
+		else
+		{
+			_details = "No metadata available yet!";
+		}
 		_status = $"{_goodCodes.Count} codes read and {_failedCodes.Count} failed.";
 	}
 

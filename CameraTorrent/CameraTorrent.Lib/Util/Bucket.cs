@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using CameraTorrent.Lib.API;
 using CameraTorrent.Lib.Impl;
@@ -11,6 +12,7 @@ namespace CameraTorrent.Lib.Util
         private List<(int id, int from, int end, int idx)> _toc;
         private IStringBuff[] _buff;
         private int[] _written;
+        private IDictionary<ushort, DataPacket> _waiting;
 
         private void BuildToc(MetaContent info)
         {
@@ -70,11 +72,24 @@ namespace CameraTorrent.Lib.Util
                 .Select(p => (IStringBuff)new StringBuff(p.Length))
                 .ToArray();
             _written = info.Files.Select(_ => 0).ToArray();
+            if (_waiting == null)
+            {
+                return;
+            }
+            foreach (var item in _waiting.Values)
+                Import(item);
+            _waiting.Clear();
         }
 
         public void Import(DataPacket data)
         {
             var id = data.Id;
+            if (Info == null)
+            {
+                _waiting ??= new SortedDictionary<ushort, DataPacket>();
+                _waiting[id] = data;
+                return;
+            }
             var pOff = id * Info.PieceLen;
             var matches = _toc.Where(t => t.id == id).ToArray();
             foreach (var match in matches)
@@ -96,6 +111,16 @@ namespace CameraTorrent.Lib.Util
 
         public IEnumerable<BucketFile> CheckProgress()
         {
+            if (Info == null)
+            {
+                var unknown = -_waiting.Count;
+                var now = DateTimeOffset.Now;
+                yield return new PartialBucketFile(unknown, new FileMeta
+                {
+                    Modified = now, Name = "<unknown>", Size = unknown, Type = "---"
+                });
+                yield break;
+            }
             for (var i = 0; i < Info.Files.Length; i++)
             {
                 var file = Info.Files[i];
