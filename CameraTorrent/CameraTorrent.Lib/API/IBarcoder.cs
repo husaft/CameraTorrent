@@ -7,6 +7,6 @@ namespace CameraTorrent.Lib.API
     {
         Task<Stream> Write(string input);
 
-        Task<string> Read(Stream input);
+        Task<string[]> Read(Stream input);
     }
 }

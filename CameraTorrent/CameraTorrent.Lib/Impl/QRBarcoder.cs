@@ -1,6 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using CameraTorrent.Lib.API;
 using SixLabors.ImageSharp;
@@ -38,7 +39,7 @@ namespace CameraTorrent.Lib.Impl
             return mem;
         }
 
-        public async Task<string> Read(Stream input)
+        public async Task<string[]> Read(Stream input)
         {
             using var img = await Image.LoadAsync<Rgb24>(input);
             var qr = new ZXing.ImageSharp.BarcodeReader<Rgb24>
@@ -50,8 +51,8 @@ namespace CameraTorrent.Lib.Impl
                 },
                 AutoRotate = true
             };
-            var result = qr.Decode(img);
-            var text = result.Text;
+            var result = qr.DecodeMultiple(img);
+            var text = result.Select(r => r.Text).ToArray();
             return text;
         }
     }

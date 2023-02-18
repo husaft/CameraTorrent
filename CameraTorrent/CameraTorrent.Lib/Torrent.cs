@@ -20,7 +20,16 @@ namespace CameraTorrent.Lib
 
         public async Task<bool> Unpack(Stream input, Bucket bucket)
         {
-            var barcode = await Barcoder.Read(input);
+            var ok = false;
+            var barCodes = await Barcoder.Read(input);
+            foreach (var barCode in barCodes)
+                if (await Unpack(barCode, bucket))
+                    ok = true;
+            return ok;
+        }
+
+        private async Task<bool> Unpack(string barcode, Bucket bucket)
+        {
             var got = Packets.Parse(barcode);
             if (got == null)
             {
