@@ -9,22 +9,30 @@ namespace CameraTorrent.Util
 {
     internal sealed class WebFileArg : IFileArg, IBrowserFile
     {
-        private readonly IBrowserFile _file;
+        private readonly IBrowserFile? _bFile;
+        private readonly IFileArg? _aFile;
 
         public WebFileArg(IBrowserFile file)
         {
-            _file = file;
+            _bFile = file;
         }
 
-        public string Name => _file.Name;
-        public DateTimeOffset LastModified => _file.LastModified;
-        public long Size => _file.Size;
-        public string ContentType => _file.ContentType;
+        public WebFileArg(IFileArg file)
+        {
+            _aFile = file;
+        }
+
+        public string Name => _bFile?.Name ?? _aFile!.Name;
+        public DateTimeOffset LastModified => _bFile?.LastModified ?? _aFile!.LastModified;
+        public long Size => _bFile?.Size ?? _aFile!.Size;
+        public string ContentType => _bFile?.ContentType ?? _aFile!.ContentType;
 
         public Stream OpenReadStream(long maxAllowedSize, CancellationToken token = default)
-            => _file.OpenReadStream(maxAllowedSize, token);
+            => _aFile?.Read(maxAllowedSize, token).GetAwaiter().GetResult() ??
+               _bFile!.OpenReadStream(maxAllowedSize, token);
 
         public Task<Stream> Read(long maxAllowedSize, CancellationToken token = default)
-            => Task.FromResult(OpenReadStream(maxAllowedSize, token));
+            => _aFile?.Read(maxAllowedSize, token) ??
+               Task.FromResult(_bFile!.OpenReadStream(maxAllowedSize, token));
     }
 }
