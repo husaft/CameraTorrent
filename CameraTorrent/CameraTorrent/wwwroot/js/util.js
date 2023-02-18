@@ -33,7 +33,7 @@ window.stopVideo = (src) => {
     }
 }
 
-window.startVideo = (src) => {
+window.startVideo = async (src) => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         const setup = {
             video: {
@@ -42,22 +42,27 @@ window.startVideo = (src) => {
                 height: { min: 576, ideal: 720, max: 1080 }
             }
         };
-        navigator.mediaDevices.getUserMedia(setup).then(function (stream) {
-            const btn = document.getElementById(src + "Btn");
-            btn.style.display = "block";
-            const video = document.getElementById(src);
-            video.style.display = "block";
+        let stream;
+        try {
+            stream = await navigator.mediaDevices.getUserMedia(setup);
+        } catch (err) {
+            setup.video.facingMode = null;
+            stream = await navigator.mediaDevices.getUserMedia(setup);
+        }
+        const btn = document.getElementById(src + "Btn");
+        btn.style.display = "block";
+        const video = document.getElementById(src);
+        video.style.display = "block";
 
-            if ("srcObject" in video) {
-                video.srcObject = stream;
-            } else {
-                video.src = window.URL.createObjectURL(stream);
-            }
-            video.onloadedmetadata = function (_e) {
-                video.play();
-            };
-            video.style.webkitTransform = "scaleX(-1)";
-            video.style.transform = "scaleX(-1)";
-        });
+        if ("srcObject" in video) {
+            video.srcObject = stream;
+        } else {
+            video.src = window.URL.createObjectURL(stream);
+        }
+        video.onloadedmetadata = function (_e) {
+            video.play();
+        };
+        video.style.webkitTransform = "scaleX(-1)";
+        video.style.transform = "scaleX(-1)";
     }
 }
