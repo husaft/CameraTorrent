@@ -2,6 +2,9 @@
 @using Humanizer
 @using CameraTorrent.Lib
 @using CameraTorrent.Lib.Util
+@using CameraTorrent.Util
+
+@* ReSharper disable once InconsistentNaming *@
 @inject IJSRuntime JS
 
 <PageTitle>Camera Torrent</PageTitle>
@@ -9,6 +12,10 @@
 <h1>File receiving</h1>
 
 Select one or more photos and the package will be opened for you.
+
+<video id="videoFeed" width="1024" height="576" style="display: none"></video>
+<button id="videoFeedBtn" class="btn btn-primary" style="display: none" @onclick="CaptureFrame">Capture!</button>
+<canvas class="d-none" id="currentFrame" width="1280" height="720"></canvas>
 
 <br />
 <br />
@@ -146,5 +153,25 @@ Select one or more photos and the package will be opened for you.
 		await JS.InvokeVoidAsync("downloadFileFromStream", name, streamRef);
 
 		_status = $"Downloaded '{name}' with {size}!";
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		await JS.InvokeVoidAsync("startVideo", "videoFeed");
+	}
+
+	private async Task CaptureFrame()
+	{
+		var dot = DotNetObjectReference.Create(this);
+		await JS.InvokeAsync<string>("getFrame", "videoFeed", "currentFrame", dot);
+	}
+
+	[JSInvokable]
+	public async Task ProcessImage(string rawStr)
+	{
+		var imageStr = rawStr.Split(',')[1];
+		var imageData = Convert.FromBase64String(imageStr);
+		var list = new List<IBrowserFile> { imageData.Wrap() };
+		await ProcessImages(list);
 	}
 }
