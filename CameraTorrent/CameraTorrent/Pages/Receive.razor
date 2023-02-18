@@ -13,7 +13,7 @@
 
 Select one or more photos and the package will be opened for you.
 
-<video id="videoFeed" style="width: 100px; height: 100px; display: none"></video>
+<video id="videoFeed" style="width: 50%; height: 50%; display: none"></video>
 <button id="videoFeedBtn" class="btn btn-primary" style="display: none" @onclick="CaptureFrame">Capture!</button>
 <canvas class="d-none2" id="currentFrame" width="110" height="110" style="border: black; border-style: double"></canvas>
 
@@ -173,5 +173,6 @@ Select one or more photos and the package will be opened for you.
 		var imageData = Convert.FromBase64String(imageStr);
 		var list = new List<IBrowserFile> { imageData.Wrap() };
 		await ProcessImages(list);
+		await InvokeAsync(StateHasChanged);
 	}
 }
