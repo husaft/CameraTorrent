@@ -13,9 +13,15 @@ window.downloadFileFromStream = async (fileName, contentStreamReference) => {
 
 window.getFrame = (src, dest, dotNetHelper) => {
     const video = document.getElementById(src);
+    const w = video.videoWidth;
+    const h = video.videoHeight;
+
     const canvas = document.getElementById(dest);
+    canvas.width = w;
+    canvas.height = h;
+
     const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, 1280, 720);
+    ctx.drawImage(video, 0, 0, w, h);
 
     const dataUrl = canvas.toDataURL("image/jpeg");
     dotNetHelper.invokeMethodAsync('ProcessImage', dataUrl);
