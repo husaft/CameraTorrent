@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -52,6 +53,10 @@ namespace CameraTorrent.Lib.Impl
                 AutoRotate = true
             };
             var result = qr.DecodeMultiple(img);
+            if (result == null)
+            {
+                return Array.Empty<string>();
+            }
             var text = result.Select(r => r.Text).ToArray();
             return text;
         }
