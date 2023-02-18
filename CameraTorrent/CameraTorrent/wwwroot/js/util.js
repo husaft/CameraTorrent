@@ -53,7 +53,14 @@ window.startVideo = async (src) => {
             stream = await navigator.mediaDevices.getUserMedia(setup);
         } catch (err) {
             setup.video.facingMode = null;
-            stream = await navigator.mediaDevices.getUserMedia(setup);
+            try {
+                stream = await navigator.mediaDevices.getUserMedia(setup);
+            } catch (sErr) {
+                const tmp = setup.video.width;
+                setup.video.width = setup.video.height;
+                setup.video.height = tmp;
+                stream = await navigator.mediaDevices.getUserMedia(setup);
+            }
         }
         const btn = document.getElementById(src + "Btn");
         btn.style.display = "block";
